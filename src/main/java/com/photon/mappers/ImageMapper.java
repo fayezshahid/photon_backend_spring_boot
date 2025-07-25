@@ -18,6 +18,14 @@ public class ImageMapper {
                     .collect(Collectors.toList());
         }
 
+        List<Long> sharedWithFriendIds = null;
+        if (image.getShares() != null && !image.getShares().isEmpty()) {
+            sharedWithFriendIds = image.getShares()
+                    .stream()
+                    .map(share -> share.getViewer().getId())
+                    .collect(Collectors.toList());
+        }
+
         return ImageDTO.builder()
                 .id(image.getId())
                 .name(image.getName())
@@ -29,6 +37,7 @@ public class ImageMapper {
                 .createdAt(image.getCreatedAt())
                 .updatedAt(image.getUpdatedAt())
                 .albumIds(albumIds)
+                .sharedWithFriendIds(sharedWithFriendIds)
                 .build();
     }
 

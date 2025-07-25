@@ -1,5 +1,6 @@
 package com.photon.services;
 
+import com.photon.dtos.SharedImageDTO;
 import com.photon.entities.Image;
 import com.photon.entities.Share;
 import com.photon.entities.User;
@@ -15,11 +16,16 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ShareService {
 
     private final ShareRepository shareRepository;
     private final UserRepository userRepository;
     private final ImageRepository imageRepository;
+
+    public List<SharedImageDTO> getSharedImages(Long currentUserId) {
+        return shareRepository.findSharedImagesWithOwnersByViewerId(currentUserId);
+    }
 
     public String shareImage(Long userId, Long imageId, Long currentUserId) {
         // Create new share

@@ -18,4 +18,5 @@ public class ImageDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<Long> albumIds;
+    private List<Long> sharedWithFriendIds;
 }

@@ -1,5 +1,6 @@
 package com.photon.controllers;
 
+import com.photon.dtos.UserDTO;
 import com.photon.entities.User;
 import com.photon.repositories.UserRepository;
 import com.photon.services.AuthService;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/pairs")
@@ -25,30 +27,45 @@ public class PairController {
      * Get available users (not friends, no pending requests)
      */
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getUsers() {
+    public ResponseEntity<List<UserDTO>> getUsers() {
         Long currentUserId = authService.getCurrentUserId();
         List<User> users = pairService.getAvailableUsers(currentUserId);
-        return ResponseEntity.ok(users);
+
+        List<UserDTO> userDtos = users.stream()
+                .map(user -> new UserDTO(user.getId(), user.getEmail()))
+                .toList();
+
+        return ResponseEntity.ok(userDtos);
     }
 
     /**
      * Get friends
      */
     @GetMapping("/friends")
-    public ResponseEntity<List<User>> getFriends() {
+    public ResponseEntity<List<UserDTO>> getFriends() {
         Long currentUserId = authService.getCurrentUserId();
         List<User> friends = pairService.getFriends(currentUserId);
-        return ResponseEntity.ok(friends);
+
+        List<UserDTO> friendsDtos = friends.stream()
+                .map(user -> new UserDTO(user.getId(), user.getEmail()))
+                .toList();
+
+        return ResponseEntity.ok(friendsDtos);
     }
 
     /**
      * Get pending friend requests
      */
     @GetMapping("/requests")
-    public ResponseEntity<List<User>> getRequests() {
+    public ResponseEntity<List<UserDTO>> getRequests() {
         Long currentUserId = authService.getCurrentUserId();
         List<User> requests = pairService.getPendingRequests(currentUserId);
-        return ResponseEntity.ok(requests);
+
+        List<UserDTO> requestDtos = requests.stream()
+                .map(user -> new UserDTO(user.getId(), user.getEmail()))
+                .toList();
+
+        return ResponseEntity.ok(requestDtos);
     }
 
     /**
@@ -65,13 +82,13 @@ public class PairController {
      * Send friend request
      */
     @PostMapping("/request/{id}")
-    public ResponseEntity<String> sendRequest(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> sendRequest(@PathVariable Long id) {
         try {
             Long currentUserId = authService.getCurrentUserId();
             pairService.sendRequest(currentUserId, id);
-            return ResponseEntity.ok("Friend request sent successfully");
+            return ResponseEntity.ok(Map.of("message", "Request sent successfully"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error sending friend request: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Error sending friend request: " + e.getMessage()));
         }
     }
 
@@ -79,13 +96,13 @@ public class PairController {
      * Delete sent friend request
      */
     @DeleteMapping("/request/{id}")
-    public ResponseEntity<String> deleteRequest(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> deleteRequest(@PathVariable Long id) {
         try {
             Long currentUserId = authService.getCurrentUserId();
             pairService.deleteRequest(currentUserId, id);
-            return ResponseEntity.ok("Friend request deleted successfully");
+            return ResponseEntity.ok(Map.of("message", "Request deleted successfully"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error deleting friend request: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Error deleting friend request: " + e.getMessage()));
         }
     }
 
@@ -93,13 +110,13 @@ public class PairController {
      * Accept friend request
      */
     @PutMapping("/request/{id}/accept")
-    public ResponseEntity<String> acceptRequest(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> acceptRequest(@PathVariable Long id) {
         try {
             Long currentUserId = authService.getCurrentUserId();
             pairService.acceptRequest(currentUserId, id);
-            return ResponseEntity.ok("Friend request accepted successfully");
+            return ResponseEntity.ok(Map.of("message", "Request accepted successfully"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error accepting friend request: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Error accepting friend request: " + e.getMessage()));
         }
     }
 
@@ -107,13 +124,13 @@ public class PairController {
      * Reject friend request
      */
     @DeleteMapping("/request/{id}/reject")
-    public ResponseEntity<String> rejectRequest(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> rejectRequest(@PathVariable Long id) {
         try {
             Long currentUserId = authService.getCurrentUserId();
             pairService.rejectRequest(currentUserId, id);
-            return ResponseEntity.ok("Friend request rejected successfully");
+            return ResponseEntity.ok(Map.of("message", "Request rejected successfully"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error rejecting friend request: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Error rejecting friend request: " + e.getMessage()));
         }
     }
 
@@ -121,13 +138,13 @@ public class PairController {
      * Remove friend
      */
     @DeleteMapping("/friend/{id}")
-    public ResponseEntity<String> removeFriend(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> removeFriend(@PathVariable Long id) {
         try {
             Long currentUserId = authService.getCurrentUserId();
             pairService.removeFriend(currentUserId, id);
-            return ResponseEntity.ok("Friend removed successfully");
+            return ResponseEntity.ok(Map.of("message", "Friend removed successfully"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error removing friend: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Error removing friend request: " + e.getMessage()));
         }
     }
 
